@@ -1,3 +1,5 @@
+~Current Version:1.4~
+
 # LEGACY CODE - APPROACH WITH CAUTION
 
 Some of this code is very old and not that great. 
