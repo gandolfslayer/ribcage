@@ -25,6 +25,27 @@
 	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+// GitHub Plugin Updater Integration
+if ( is_admin() ) {
+    require_once dirname(__FILE__) . '/includes/github-updater.php';
+    
+    $config = array(
+        'slug'               => plugin_basename( __FILE__ ),
+        'proper_folder_name' => 'ribcage', // Adjust if your plugin folder name is different.
+        'api_url'            => 'https://api.github.com/repos/gandolfslayer/ribcage',
+        'raw_url'            => 'https://raw.github.com/gandolfslayer/ribcage/master/',
+        'github_url'         => 'https://github.com/gandolfslayer/ribcage',
+        'zip_url'            => 'https://github.com/gandolfslayer/ribcage/zipball/master',
+        'sslverify'          => true,
+        'requires'           => '5.0',
+        'tested'             => '6.0',
+        'readme'             => 'README.md',
+        // 'access_token'    => 'your_access_token_if_needed'
+    );
+    new GitHub_Updater( $config );
+}
+
+// Original Plugin Includes
 include ('ribcage-includes/functions.php');
 include ('ribcage-includes/log.php');
 include ('ribcage-includes/template.php');
@@ -74,7 +95,7 @@ function ribcage_init (){
 
 	$GLOBALS['ribcage_page'] = TRUE;
 
-	// Add our bits to the page title in the header ans elsewhere.
+	// Add our bits to the page title in the header and elsewhere.
 	add_filter('wp_title', 'ribcage_page_title',10,3);
 
 	// Donate IPN from Paypal
@@ -96,11 +117,11 @@ function ribcage_init (){
 	if (isset($wp_query->query_vars['artist_slug'])) {
 		$artist = get_artist_by_slug ($wp_query->query_vars['artist_slug']);
 
-                if (is_wp_error($artist)){
-                    ribcage_404();
-                }
+        if (is_wp_error($artist)){
+            ribcage_404();
+        }
 
-                $wp_query->query_vars['pagename'] = $wp_query->query_vars['artist_slug'];
+        $wp_query->query_vars['pagename'] = $wp_query->query_vars['artist_slug'];
 
 		if (is_artist_page()){
 			switch ($wp_query->query_vars['artist_page']) {
@@ -162,15 +183,15 @@ function ribcage_init (){
 			if ($wp_query->query_vars['format'] == 'donate') {
 				$release = get_release_by_slug ($wp_query->query_vars['release_slug'], FALSE, FALSE);
 
-                                if (is_wp_error($release)){
-                                    ribcage_404();
-                                }
+                if (is_wp_error($release)){
+                    ribcage_404();
+                }
 
 				$artist = get_artist ($release['release_artist']);
 
-                                if (is_wp_error($artist)){
-                                    ribcage_404();
-                                }
+                if (is_wp_error($artist)){
+                    ribcage_404();
+                }
 
 				ribcage_donate();
 			}
@@ -183,25 +204,9 @@ function ribcage_init (){
 			else if ($wp_query->query_vars['format'] == 'skip') {
 				$release = get_release_by_slug ($wp_query->query_vars['release_slug'], FALSE, FALSE);
 
-                                if (is_wp_error($release)){
-                                    ribcage_404();
-                                }
-
-				$artist = get_artist ($release['release_artist']);
-
-                                if (is_wp_error($artist)){
-                                    ribcage_404();
-                                }
-
-				$load = ribcage_load_template('download.php');
-			}
-
-			else {
-				$release = get_release_by_slug ($wp_query->query_vars['release_slug'], FALSE, FALSE);
-
-                                if (is_wp_error($release)){
-                                    ribcage_404();
-                                }
+                if (is_wp_error($release)){
+                    ribcage_404();
+                }
 
 				$artist = get_artist ($release['release_artist']);
 
@@ -209,7 +214,21 @@ function ribcage_init (){
                     ribcage_404();
                 }
 
+				$load = ribcage_load_template('download.php');
+			}
 
+			else {
+				$release = get_release_by_slug ($wp_query->query_vars['release_slug'], FALSE, FALSE);
+
+                if (is_wp_error($release)){
+                    ribcage_404();
+                }
+
+				$artist = get_artist ($release['release_artist']);
+
+                if (is_wp_error($artist)){
+                    ribcage_404();
+                }
 
 				$load = ribcage_load_template('post-download.php');
 			}
@@ -255,14 +274,10 @@ function ribcage_init (){
 				else {
 					$load = ribcage_load_template('download.php');
 				}
+			}
+
+			// If the user has just got back from Paypal, congratulate them.
 		}
-
-			// If the user has just got back from Paypal congratulate them on their brillance and given them
-			// the download. Maybe lower the chance of a nag?
-
-		}
-
-
 	}
 
 	// Streams
@@ -284,7 +299,6 @@ function ribcage_init (){
 		else {
 			$load = show_player($wp_query->query_vars['release_slug']);
 		}
-
 	}
 
 	// Purchases
@@ -293,9 +307,9 @@ function ribcage_init (){
 		// Lookup the item they are looking for in the database.
 		$product = get_product($wp_query->query_vars['ribcage_product_id']);
 
-                if (is_wp_error($product)){
-                    ribcage_404();
-                }
+        if (is_wp_error($product)){
+            ribcage_404();
+        }
 
 		// Some products are associated with releases, some are not.
 		if (isset($product['product_related_release'])) {
@@ -307,7 +321,7 @@ function ribcage_init (){
 		$wp_query->query_vars['artist_slug'] = true;
 
 		if (isset($wp_query->query_vars['ribcage_buy_mode'])){
-			switch ($wp_query->query_vars['ribcage_buy_mode']) {
+			switch ($wp_query->query_vars['ribcage_buy_mode']){
 				// Send them to Paypal
 				case 'go-ww' :
 				case 'go-uk' :
@@ -319,7 +333,7 @@ function ribcage_init (){
 					$load = ribcage_load_template('thanks.php');
 					break;
 
-				// We are recieving an IPN ping from Paypal.
+				// Receiving an IPN ping from Paypal.
 				case 'ipn' :
 					ribcage_buy_ipn();
 					break;
@@ -330,7 +344,6 @@ function ribcage_init (){
 					break;
 			}
 		}
-
 		// Just show the person the item they are looking for.
 		else {
 			$load = ribcage_load_template('buy.php');
@@ -433,28 +446,25 @@ add_filter('query_vars', 'ribcage_queryvars' );
  **/
 function ribcage_flush_rules (){
 	global $wp_rewrite;
-
 	$wp_rewrite->flush_rules();
 }
 
 /**
  * Filter on wp_title to add the Ribcage pages to page title.
  *
- * Some stuff from this function is lifted from the wp_title function itself. Cheers to the developers there.
+ * Some parts of this function are lifted from the wp_title function itself.
  *
- * @param string $title The title as it currently stands - what we are adding to.
+ * @param string $title The title as it currently stands.
  * @param string $seplocation Optional. Direction to display title, 'right'.
- * @return string The title with added Ribcage
- * @author Alex Andrews <alex@recordsonribs.com>
- **/
+ * @return string The title with added Ribcage elements.
+ */
 function ribcage_page_title ($title, $sep = '&raquo;', $seplocation = '') {
 	global $wp_query;
 	global $release, $artist, $product;
 
-        // We've got a 404 situation here.
-        if (is_wp_error($artist) or is_wp_error($release) or is_wp_error($product)){
-            return;
-        }
+    if (is_wp_error($artist) or is_wp_error($release) or is_wp_error($product)){
+        return;
+    }
 
 	if (isset($wp_query->query_vars['release_index'])) {
 		$title_array [] = "Releases";
@@ -479,11 +489,9 @@ function ribcage_page_title ($title, $sep = '&raquo;', $seplocation = '') {
 			case 'press':
 				$title_array [] = 'Press';
 				break;
-
 			case 'bio':
 				$title_array [] = 'Biography';
 				break;
-
 			default :
 				$title_array [] = $release['release_title'];
 		}
@@ -493,7 +501,6 @@ function ribcage_page_title ($title, $sep = '&raquo;', $seplocation = '') {
 		$title_array [] = "Downloading ".$artist['artist_name']." - ".$release['release_title'];
 	}
 
-	// If we have the title on the right, then switch the whole thing around.
 	if ($seplocation == 'right') {
 		$title_array = array_reverse($title_array);
 		$title_array [] = $title;
@@ -515,9 +522,7 @@ function ribcage_page_title ($title, $sep = '&raquo;', $seplocation = '') {
  * Activates the Ribcage plugin.
  * Adds Ribcage tables to the database and options to wp_options with defaults installed.
  *
- * @author Alex Andrews <alex@recordsonribs.com>
  * @return void
- * @todo When uninstall and deactive routines are added convert into a class as per http://wordpress.stackexchange.com/questions/25910/uninstall-activate-deactivate-a-plugin-typical-features-how-to/25979#25979
  */
 function ribcage_activate(){
 	require_once dirname(__FILE__) . '/ribcage-includes/install.php';
@@ -533,9 +538,8 @@ function ribcage_activate(){
 register_activation_hook(WP_PLUGIN_DIR . '/ribcage/ribcage.php', 'ribcage_activate');
 
 /**
- * De-activates Ribcage.
+ * Deactivates Ribcage.
  *
- * @author Alex Andrews <alex@recordsonribs.com>
  * @return void
  */
 function ribcage_deactivate(){
@@ -543,11 +547,9 @@ function ribcage_deactivate(){
 register_deactivation_hook(WP_PLUGIN_DIR . '/ribcage/ribcage.php', "ribcage_deactivate");
 
 /**
- * Removes Ribcage from installation.
+ * Uninstalls Ribcage.
  *
- * @author Alex Andrews
  * @return void
- *
  */
 function ribcage_uninstall(){
 	delete_option('ribcage_database_version');
